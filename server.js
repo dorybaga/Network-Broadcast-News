@@ -19,15 +19,15 @@ const server = net.createServer(function(socket){
   socket.on('data', function(data){
     process.stdout.write(clientID + ": " + data.toString());
 
-    // Blast message to other clients connected to chat
+    // Relay message to other clients connected to chat
     clients.forEach(function(client){
-      client.write(data);
+      if(client === socket){
+        return;
+      } else {
+      client.write(clientID + ": " + data);
+      }
     });
-
   });
-
-
-
 });
 
 // Make server listen
