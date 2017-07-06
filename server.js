@@ -9,7 +9,7 @@ const server = net.createServer(function(socket){
 
   // Add client to list
   clients.push(socket);
-  // console.log(clients);
+  console.log(clients.length);
 
   // Identify client's IP address
   const clientID = socket.remoteAddress;
@@ -17,18 +17,31 @@ const server = net.createServer(function(socket){
 
   // Listens for data; if data is recieved (from client) renders data to terminal
   socket.on('data', function(data){
-    process.stdout.write(clientID + ": " + data.toString());
+    // process.stdout.write(clientID + ": " + data.toString());
+    broadcast(clientID + ": " + data, socket);
+  });
 
-    // Relay message to other clients connected to chat
+ // Relay message to other clients connected to chat
+  function broadcast(msg, sender){
     clients.forEach(function(client){
       if(client === socket){
         return;
       } else {
-      client.write(clientID + ": " + data);
+      client.write(msg);
+
       }
     });
+    process.stdout.write(msg);
+  }
+
+// Close the socket if client exits the chat
+  socket.on('end', function(){
+    clients.splice(clients.indexOf(socket));
+    broadcast(clientID + ": " + "has left the chat.");
+    console.log(clients.length);
   });
-});
+ });
+
 
 // Make server listen
 server.listen(6969, '0.0.0.0', function(){
